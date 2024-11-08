@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guessing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1506748686217-4f8db23f56fd?crop=entropy&cs=tinysrgb&fit=max&ixid=MnwzNjUyOXwwfDF8c2VhY2h8MHx8Y29sb3JmdWx3fGVufDB8fHx8&ixlib=rb-1.2.1&q=80&w=1080');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #83e330;
+        }
+
+        .container {
+            background-color: rgba(13, 26, 29, 0.7);
+            padding: 200px;
+            width: 1000px;
+            text-align: center;
+            border-radius: 50px;
+            box-shadow: 0px 15px 30px rgba(61, 89, 203, 0.6);
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            font-size: 50px;
+            color: #d515d2;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: rgb(244, 249, 249);
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            width: 50%;
+            margin-top: 20px;
+            transition: 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            width: 75%;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 2px solid #80c1b4;
+            font-size: 18px;
+            background-color: #222;
+            color: white;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.7);
+        }
+
+        input[type="number"]:disabled {
+            background-color: #ddd;
+        }
+
+        #message {
+            font-size: 20px;
+            color: #32CD32;
+            font-weight: bold;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .score {
+            font-size: 20px;
+            color: #ffcc00;
+            margin-top: 20px;
+        }
+
+        #credits {
+            position: absolute;
+            bottom: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            50% {
+                transform: translateX(5px);
+            }
+
+            75% {
+                transform: translateX(-5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Guess the Number Game</h1>
+        <h2><i>Made By ~Krishna Kanta</i></h2>
+        <br>
+        <div id="gameSetup">
+            <label for="maxNumber">
+                <h3>Enter the maximum number for guessing:</h3>
+            </label>
+            <input type="number" id="maxNumber" placeholder="e.g., 100">
+            <button class="btn" id="startBtn">Start Game</button>
+        </div>
+
+        <div id="gameArea" style="display: none;">
+            <input type="number" id="guessInput" placeholder="Guess the number" disabled>
+            <button class="btn" id="submitBtn" disabled>Submit Guess</button>
+            <div id="message"></div>
+            <div class="score" id="scoreDisplay"></div>
+        </div>
+
+        <div id="credits">
+            <h3><b>
+                    <Made by Krishna Kanta>
+                </b></h3>
+        </div>
+    </div>
+
+    <script>
+        let max;
+        let random;
+        let guessesLeft;
+        let score = 0;
+
+        const startBtn = document.getElementById("startBtn");
+        const guessInput = document.getElementById("guessInput");
+        const submitBtn = document.getElementById("submitBtn");
+        const message = document.getElementById("message");
+        const scoreDisplay = document.getElementById("scoreDisplay");
+        const gameArea = document.getElementById("gameArea");
+        const maxNumberInput = document.getElementById("maxNumber");
+        const gameSetup = document.getElementById("gameSetup");
+
+        startBtn.addEventListener("click", startGame);
+        submitBtn.addEventListener("click", checkGuess);
+
+        function startGame() {
+            const maxNumber = parseInt(maxNumberInput.value);
+
+            if (isNaN(maxNumber) || maxNumber <= 0) {
+                message.textContent = "Please enter a valid positive number for the maximum.";
+                message.style.color = "#ff6347"; // Red for invalid input
+                message.style.display = "block";
+                maxNumberInput.classList.add("shake");
+                setTimeout(() => maxNumberInput.classList.remove("shake"), 300);
+                return;
+            }
+
+            gameSetup.style.display = "none";
+            gameArea.style.display = "block";
+
+            score = 0;
+            guessesLeft = 5;  // Player has 5 guesses
+            updateScore();
+            message.textContent = "Start guessing!";
+            message.style.display = "block";
+
+            max = maxNumber;
+            random = Math.floor(Math.random() * max) + 1;
+
+            guessInput.disabled = false;
+            submitBtn.disabled = false;
+            guessInput.value = '';
+        }
+
+        function checkGuess() {
+            const guess = parseInt(guessInput.value);
+
+            if (isNaN(guess)) {
+                message.textContent = "Please enter a valid number!";
+                message.style.color = "#ff6347"; // Red for invalid input
+                message.style.display = "block";
+                guessInput.classList.add("shake");
+                setTimeout(() => guessInput.classList.remove("shake"), 300);
+                return;
+            }
+
+            guessesLeft--;
+            updateScore();
+
+            if (guess === random) {
+                message.textContent = `Congrats! You guessed the number: ${random}`;
+                message.style.color = "#32CD32"; // Green for correct guess
+                message.style.display = "block";
+                setTimeout(resetGame, 2000);
+            } else if (guessesLeft > 0) {
+                message.textContent = `Wrong guess! You have ${guessesLeft} guesses left.`;
+                message.style.color = "#ff6347"; // Red for wrong guess
+                message.style.display = "block";
+            } else {
+                message.textContent = `Game over! The number was ${random}.`;
+                message.style.color = "#ff6347";
+                message.style.display = "block";
+                setTimeout(resetGame, 2000);
+            }
+
+            guessInput.value = '';
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = `Score: ${score}`;
+        }
+
+        function resetGame() {
+            gameSetup.style.display = "block";
+            gameArea.style.display = "none";
+            message.style.display = "none";
+        }
+    </script>
+</body>
+
+</html>
